@@ -346,10 +346,277 @@ interface에서는 선언을 하고, impl 클래스에서는 구현을 하였다
 
 ### 일부 완성되어 있는 abstract 클래스
 
+abstract는 '추상적인' 이라는 뜻을 가진다. interface나 클래스와는 또 다른 개념인데, abstract 클래스는 Java에서 마음대로 초기화하고 실행할 수 없다. 그래서, 해당 abstract를 구현한 클래스로 초기화 및 실행이 가능하다.
+
+아래 코드를 참고하자.
+
+```java
+package c.service;
+
+import c.model.PostsDAO;
+
+public abstract class PostsManagerAbstract {
+    public abstract boolean getPost(String postId);
+    public abstract boolean addPost(PostsDAO posts);
+    public abstract boolean updatePost(PostsDAO posts);
+    public abstract boolean deletePost(String postId);
+    public void printLog(String data) {
+        print("Data: " + data);
+    }
+}
+```
+
+interface 때와 비슷하게, `public abstract class ...` 와 같이 작성하여 해당 클래스가 abstract임을 나타낸다.  
+특이한 점이 있는데,
+
+- 구현 내용이 없고 선언만 되어 있는 메소드는 `abstract` 키워드가 붙는다.
+- 구현 내용이 있는 메소드 (printlog)는 `abstract` 키워드가 붙지 않는다.
+
+위처럼, abstract 클래스는 abstract로 선언된 메소드가 1개 이상일 때 선언한다. interface와는 달리 구현된 메소드가 있어도 상관 없고, 파일의 확장자는 마찬가지로 `.java`이다. 정리하면,
+
+- abstract 클래스는 선언 시 abstract라는 키워드를 class 앞에 붙인다.
+- abstract 클래스 내에는 abstract로 선언된 메소드가 0개 이상 필요하다.
+- abstract로 선언된 메소드가 1개 이상 존재한다면, 해당 메소드를 포함하고 있는 클래스는 반드시 abstract로 선언되어야 한다.
+
+abstract 클래스에 대한 구현체는 interface-implements와 비슷하게, abstract-extends를 사용한다.
+
+```java
+package c.service;
+
+import c.model.PostsDAO;
+
+public class PostsManagerImpl2 extends PostsManagerAbstract {
+    // 구현 내용 생략
+}
+```
+
+#### 정리
+
+앞서 살펴본 class, interface, abstract class를 아래와 같이 정리할 수 있다.
+
+| 내용                             | 인터페이스  | abstract class | class       |
+| -------------------------------- | ----------- | -------------- | ----------- |
+| 선언 시 사용하는 예약어          | interface   | abstract class | class       |
+| 구현 안 된 메소드 포함 가능 여부 | 가능 (필수) | 가능           | 불가능      |
+| 구현된 메소드 포함 가능 여부     | 불가        | 가능           | 가능 (필수) |
+| static 메소드 선언 가능 여부     | 불가능      | 가능           | 가능        |
+| final 메소드 선언 가능 여부      | 불가능      | 가능           | 가능        |
+| 상속 (extends) 가능              | 불가능      | 가능           | 가능        |
+| 구현 (implements) 가능           | 가능        | 불가능         | 불가능      |
+
 ### final 키워드
+
+상속 관련하여 중요한 `final` 키워드에 대해 알아보자.  
+final은 멤버 변수, 클래스, 메소드에 선언할 수 있다. 뜻에서 유추할 수 있듯 '마지막' 이라는 뜻이며, 각각의 사용 예와 역할에 대해 알아보자.
+
+#### 클래스에서의 final
+
+아래와 같이 사용할 수 있다.
+
+```java
+package c.util;
+
+public final class FinalClass {
+    // ...
+}
+```
+
+위처럼 선언이 되어 있으면 FinalClass 자체를 사용하는 것에는 문제가 없다.  
+하지만 상속에서는 final 키워드가 중요하다. **클래스가 final로 선언되어 있으면 상속을 해 줄 수 없다.**
+
+좋은 예시로 String 클래스가 있다. String은 Java에서 매우 중요한 클래스이며, 이를 개발자가 임의로 수정해서 사용할 수 없도록 하고 있다. 따라서 이 클래스를 더 이상 수정하거나 확장해서는 안 되는 경우 final로 클래스를 선언하면 된다.
+
+#### 메소드에서의 final
+
+클래스는 final로 선언되면 상속을 받을 수 없다. 비슷하게, 메소드를 final로 선언하면 Overriding 할 수 없다.
+
+```java
+package c.util;
+
+public abstract class FinalMethodClass {
+    public final void printLog(String data) {
+        print("Data: " + data);
+    }
+}
+```
+
+```java
+package c.util;
+public class FinalMethodChildClass extends FinalMethodClass {
+    public void printLog(String data) {
+        print("Child Data: " + data);
+    }
+}
+```
+
+위처럼 상속받는 클래스의 메소드를 Overriding 하려고 하는 경우, 정상적으로 컴파일이 되지 않는다.  
+해당 메소드가 final로 선언되어 있기 때문이다. 클래스의 경우와 마찬가지로, 작성한 메소드를 다른 개발자가 임의로 수정 또는 확장하지 않도록 막아 두는 역할이다.  
+책에 의하면, 클래스 final은 종종 사용하지만, 메소드 final을 사용하는 경우는 드물다고 한다.
+
+#### 변수에서의 final
+
+앞서 살펴 본 클래스, 메소드에서의 final과 변수에서의 final은 개념이 조금 다르다.
+변수에서의 final은 "이 변수를 더 이상 변경할 수 없다."고 선언하는 역할이다. 따라서, 인스턴스 변수나 static으로 선언된 클랫흐 변수는 선언과 함께 값을 지정해야 한다.
+
+```java
+package c.util;
+
+public class FinalVariable {
+    // final int instanceVar; 이러면 컴파일 에러가 발생한다.
+    final int instanceVariable = 1;
+}
+```
+
+매개 변수가 final로 선언되어 오는 경우, 값이 이미 지정된 상태로 넘어 오기 떄문에 따로 값을 지정해 주지 않아도 괜찮다. 단, 값을 수정할 수는 없다.
+
+참조 자료형의 경우에는 어떨까?
+
+```java
+package c.util;
+
+import c.model.PostsDAO;
+
+public class FinalReferenceType {
+    final PostsDAO dao = new MemberDAO();
+
+    psvm(String args[]) {
+        FinalReferenceType referenceType = new FinalReferenceType();
+        referenceType.checkDAO();
+    }
+
+    public void checkDAO() {
+        print(dao);
+        dao.name="kuyho";
+        print(dao);
+    }
+}
+
+```
+
+참조 자료형도 마찬가지로 final을 적용할 수 있다. 참조 자로형 역시 선언과 동시에 초기화가 필요하다.  
+하지만 위의 코드를 보면, dao 내에 있는 객체 (name)에 값을 할당하는 것을 볼 수 있다. 위 코드는 정상적으로 컴파일 된다.  
+참조 자료형도 final 키워드를 사용할 수 있다. 하지만 **참조 자료형 내에 선언된 객체에까지 final이 적용되는 것은 아니다**.
+
+final을 사용하는 좋은 예는 Spring을 이용하여 개발할 때의 DI (의존성 주입) 과정에 있다.
+
+```java
+@RestController
+public Class PostsController {
+
+    private final PostsService postsService;
+
+    @Autowired
+    public PostsController (
+        PostsService postsService
+    ) {
+        this.postsService = postsService;
+    }
+
+}
+```
+
+컨트롤러에서 서비스를 의존할 때, 위와 같이 '생성자 주입' 방식을 사용하는 경우 위처럼 final 키워드를 사용할 수 있다.  
+위처럼 작성하면 PostsService의 내용이 바뀌지 않도록 막아 둘 수 있으므로, 의도치 않게 의존 관계가 변경되는 것을 막을 수 있다.
 
 ### enum 클래스라는 상수의 집합도 있다면
 
+앞에서 final을 통해 기본 자료형의 값을 고정할 수 있다고 알아보았다. 이를 상수 (constant)라고 한다.  
+만약, 어떤 클래스가 상수만으로 이루어져 있을 경우, class로 선언하지 않아도 괜찮다. 대신 `enum`이라는 단어를 넣어서 선언하면, '이 객체는 상수의 집합이다' 라고 명시적으로 나타내는 역할을 한다.  
+enum은 enumeration의 약자로, '상수 목록' 정도로 이해할 수 있겠다.
+
+```java
+package c.enums;
+
+public enum OverTimeValues {
+    THREE_HOUR,
+    FIVE_HOUR,
+    WEEKEND_FOUR_HOUR,
+    WEEKEND_EIGHT_HOUR;
+}
+```
+
+위처럼 특정 시간에 따른 수당 값을 정해 놓을 경우, enum 클래스를 이용하여 선언하면 유리하다.  
+위에서 보듯, enum 클래스 내의 상수는 별도로 값을 지정할 필요도 없고, 자료 타입을 지정할 필요도 없다. 확장자는 마찬가지로 `.java`이다.
+
+```java
+package c.enums;
+
+public class OverTImeManager {
+    public int getOverTimeAmount (OverTimeValues value) {
+        int amount = 0;
+        print(value);
+
+        switch(value) {
+            case THREE_HOUR:
+                amount = 18000;
+                break;
+            case FIVE_HOUR:
+                amount = 3000;
+                break;
+            case WEEKEND_FOUR_HOUR:
+                amount = 40000;
+                break;
+            case WEEKEND_EIGHT_HOUR:
+                amount = 60000;
+                break;
+        }
+
+        return amount;
+    }
+}
+```
+
+위와 같이 switch 문을 사용할 때가 enum을 가장 효과적으로 사용하는 예시이다.
+
 ### enum을 보다 제대로 사용하기
 
+enum 내에 상수 값을 지정하는 방법도 가능하다.
+
+```java
+package c.enums;
+
+public enum OverTimeValues2 {
+    THREE_HOUR(18000),
+    FIVE_HOUR(30000),
+    WEEKEND_FOUR_HOUR(40000),
+    WEEKEND_EIGHT_HOUR(60000);
+
+    private final int amount;
+
+    OverTImeValues2 (int amount) {
+        this.amount = amount;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+}
+```
+
+앞의 예제와 비슷하지만, 각 상수에 값이 지정되어 있다.  
+주목할 점이라면 클래스의 생성자이다. 생성자의 이름 앞에 public, private, protected와 같은 접근 제어자가 붙어 있지 않다.  
+enum의 생성자에는 public이나 protected를 사용할 수 없다. package-private과 private만 사용할 수 있다.
+
+이렇게 직접 Java 코드 상에서 enum의 값을 정의해 두면 성능 상의 이점을 취할 수 있으나, 값을 변경해야 하는 경우 Java 코드를 직접 변경해야 한다는 단점이 존재한다. 값을 지정하지 않고 서버에 저장된 값을 읽어 오도록 설계한다면, 성능 상에서 약간의 손해를 볼 수 있지만 유지보수 면에서 이점을 취할 수 있다.
+
 ### enum 클래스의 부모는 무조건 java.lang.Enum이다
+
+Java 내의 enum 클래스는 무조건 `java.lang.Enum`이라는 클래스의 상속을 받는다 (컴파일러가 알아서 추가해준다).
+
+Enum 클래스는 아리와 같이 선언되어 있다.
+|접근 제어자|메소드|설명|
+|---|---|---|
+|protected | Enum(String name, int ordinal) | 컴파일러에서 자동으로 호출되도록 해놓은 생성자. 개발자가 직접 호출할 수는 없다.|
+
+name은 enum 상수의 이름이며, ordinal은 enum의 순서이다. 더 자세한 내용은 [여기](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Enum.html)서 확인할 수 있다 (Java 17 기준).
+
+Enum의 부모 클래스는 Object이기 때문에, Object의 메소드를 모두 사용할 수 있다. 하지만 Enum은 아래 4개의 메소드를 Overriding 하지 못하도록 막아 두었다.
+
+| 메소드     | 내용                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| clone()    | 객체를 복제하기 위한 메소드이다. enum에서 사용하면 안 되며, 호출될 경우 예외가 발생된다. |
+| finalize() | GC가 발생할 때 처리하기 위한 메소드이다. 사용하면 안 된다.                               |
+| hashCode() | int 타입의 해시 코드 값을 리턴하는 메소드다.                                             |
+| equals()   | 두 개의 객체가 동일한지 비교하는 메소드이다.                                             |
+
+hashCode()와 equals()는 개발자가 사용해도 무방하다. equals()는 실제로도 많이 쓰인다.
