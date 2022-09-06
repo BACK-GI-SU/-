@@ -226,3 +226,130 @@ hashCode() 메소드는 기본적으로 객체의 메모리 주소를 16진수�
 따라서 가급적이면 equals() 또는 hashCode() 메소드는 직접 작성하지 말고, IDE에서 제공하는 기능을 사용하도록 하자.
 
 ## 13. 인터페이스와 추상 클래스, enum
+
+### 메소드 내용이 없는 interface
+
+지금까지 Java 파일은 `.java` 확장자를 가졌다. 이런 파일을 컴파일 하면 `.class` 파일을 얻었고, 이것이 JRE를 통해 실행되었다.  
+하지만 `.java` 파일로부터만 `.class` 파일을 생성할 수 있는 것은 아니다. Java에는 `interface` 클래스와 `abstract` 클래스가 존재한다.  
+시스템을 개발할 때의 절차를 잘 이해하면 이러한 클래스를 활용하여 프로그램을 효율적으로 작성할 수 있다.
+
+프로그램 개발의 일반적인 절차는 아래와 같다.
+
+- 분석
+- 설계
+- 개발 및 테스트
+- 시스템 릴리즈
+
+물론 이러한 절차가 절대적인 것은 아니다. 프로그램 개발에는 다양한 방법론이 존재하며, 위의 4단계는 최대한 각 단계를 대중적으로 표현한 것이다.
+
+#### 분석
+
+시스템을 개발하기 위해서는 주어진 요구 사항을 분석해야 한다. SI/SM에서는 고객이 될 것이고, 자체 서비스 기업에서는 기획자가 이러한 역할을 수행한다. 시스템이 어떻게 개발되어야 하며, 요구 조건은 무엇인지 정의하고, 현실적인 여건을 분석한다.
+
+#### 설계
+
+앞서 분석 단계에서 분석한 내용을 토대로, 개발을 어떻게 진행할 것인지 설계한다.  
+DB 테이블의 구조와 관계, 메소드의 구성 등을 설계한다.
+
+#### 개발 및 테스트
+
+앞서 분석하고 설계한 내용을 바탕으로 실제 개발을 한다. 시스템에서 필요로 하는 기능을 만들고, 정상적으로 동작하는지 검증한다.
+
+#### 시스템 릴리즈
+
+개발한 내용을 실제 사용자가 사용할 수 있도록 제공한다. 이후 발생하는 결함이나 개선 사항 등은 운영/유지보수 단계를 거치며 개선한다.
+
+이러한 과정을 겪을 때, 분석하고 설계하는 과정은 단순히 문서에 작성하는 과정으로 끝나지 않는다. 만약 변수가 새로 추가되거나, 설계한 메소드 내용이 변경된다면? 문서에만 기록한다면, 나중에 문서도 수정해야 한다.  
+interface라는 개념은 이 때문에 등장했다. 실제 개발을 진행하기 이전에 메소드의 이름, 매개 변수 등을 미리 정해둘 수 있다. 실제 개발 단계에는 해당 interface의 구현체만 작성하면 된다.
+
+interface나 abstract를 사용해야 하는 이유는 이뿐만이 아니다.  
+우리가 TV 리모콘을 보면, '리모콘이구나!' 하고 바로 인식할 수 있다. 실제로 내부가 어떻게 구현되어 있는지는 잘 모르지만, 어떻게 사용하면 좋을지 바로 파악할 수 있다.  
+interface나 abstract가 이런 역할을 한다.
+
+```java
+public boolean equals (Object a, Object b);
+```
+
+위와 같은 코드가 있다면, 이름과 매개 변수만 보고서도 이 메소드가 어떤 역할을 하는지 여럼풋이 짐작할 수 있다. 개발자는 이 인터페이스를 호출하여 의도대로 사용하고, 이 인터페이스의 실제 구현체는 (직접 들여다 보고 이해하면 더 좋지만) 확인하지 않아도 사용할 수 있다.
+
+좋은 예가 바로 DAO이다. DB에 요청을 보내고 원하는 결과를 받게 되는데, 이 역할을 하는 메소드가 DBMS에 영향을 받을까?
+
+```java
+public List<Map<String, String> > PostsDAO (List<String> userId);
+```
+
+게시글의 고유 ID list를 넘겨 주고, DB로부터 해당 글들에 대한 정보의 list를 받아 오는 interface이다. 내부적으로 이 메소드가 Oracle에 접근하든, PostgreSQL에 접근하든, 사용자는 상관하지 않는다. 그저 적당한 요청을 보내고 원하는 결과를 받으면 된다. 이것이 interface의 장점이다.
+
+#### 요약
+
+interface와 abstract를 사용해야 하는 이유는 아래와 같다.
+
+- 설계 시에 interface를 작성해 두면, 개발할 때 기능 구현에만 집중할 수 있다.
+- 여러 명이 개발할 때, 메소드와 변수의 이름의 파편화를 최소화할 수 있다.
+- 공통적인 interface와 abstract 클래스를 선언해 두면, 선언과 구현을 구분할 수 있다.
+
+### 인터페이스를 직접 만들어보자
+
+인터페이스의 예시는 아래와 같다. 실제 코드는 작성하지 않지만, 어떤 변수나 메소드가 있었는지 정의할 때 사용한다.
+
+```java
+package c.service;
+
+import c.model.PostsDAO;
+
+public interface PostsManager {
+    public boolean getPost(String postId);
+    public boolean addPost(PostsDAO posts);
+    public boolean updatePost(PostsDAO posts);
+    public boolean deletePost(String postId);
+}
+```
+
+앞서 다룬 클래스와 가장 다른 점은, `public class ...`로 시작하는 것이 아니라 `public interface...`로 시작한다는 점이다. 해당 클래스가 interface임을 나타내는 것이다.  
+다음으로는, 구현 내용이 없다. 앞서 언급한 바와 같이, **실제 코드는 작성하지 않는다**.  
+위 내용이 기존의 클래스와 가장 다른 점이다. 위처럼 단순히 필요한 멤버 변수 및 메소드를 정의하고, 필요한 경우 해당 메소드를 호출하게 된다.
+
+그렇다면 실제 구현은 어떻게 하면 될까?  
+아래와 같은 클래스를 작성해 볼 수 있다.
+
+```java
+package c.service;
+
+public class PostsManagerImpl implements PostsManager {
+
+    @Override
+    public boolean getPost(String postId) {
+
+    }
+
+    @Override
+    public boolean addPost(PostsDAO posts) {
+
+    }
+
+    @Override
+    public boolean updatePost(PostsDAO posts) {
+
+    }
+
+    @Override
+    public boolean deletePost(String postId) {
+
+    }
+}
+```
+
+interface에서는 선언을 하고, impl 클래스에서는 구현을 하였다 (선언과 구현의 분리).  
+보통 interface의 구현체는 interface의 클래스명 + Impl 와 같은 식으로 알아보기 쉽게 이름을 정한다 (필수적이지는 않다).  
+중요한 점은 `public class PostsManagerImpl implements PostsManager` 라는 부분이다. PostsManager라는 interface를 콕 집어서, 해당 인터페이스를 PostsManagerImpl이라는 이름을 통해 구현하겠다는 선언이다.  
+구현체는 interface의 모든 메소드를 구현해야 성공적으로 컴파일된다. 메소드명, 리턴 타입과 멤버 변수가 모두 interface와 동일해야 하며, 위에 @Override라는 어노테이션이 붙는다 (나중에 자세히 다룰 것).
+
+### 일부 완성되어 있는 abstract 클래스
+
+### final 키워드
+
+### enum 클래스라는 상수의 집합도 있다면
+
+### enum을 보다 제대로 사용하기
+
+### enum 클래스의 부모는 무조건 java.lang.Enum이다
